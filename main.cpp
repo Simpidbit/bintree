@@ -16,17 +16,25 @@ int main()
 {
     bintree_t<int> *tree = new bintree_t<int>(true);
 
+    auto print_action = [] (treenode_t<int> *node, uint_t level, left_or_right_e) {
+        cout << node->value << ", ";
+    };
+
     cout << "层序遍历:" << endl;
-    tree->trav_bfs();
+    tree->trav_bfs(print_action);
+    cout << endl;
 
     cout << "前序遍历:" << endl;
-    tree->trav_pre();
+    tree->trav_pre(print_action);
+    cout << endl;
 
     cout << "中序遍历:" << endl;
-    tree->trav_in();
+    tree->trav_in(print_action);
+    cout << endl;
 
     cout << "后序遍历:" << endl;
-    tree->trav_post();
+    tree->trav_post(print_action);
+    cout << endl;
 
     delete tree;
 
@@ -35,7 +43,8 @@ int main()
     search_tree_t<int> *search_tree = new search_tree_t<int>(true);
 
     cout << "层序遍历:" << endl;
-    search_tree->trav_bfs();
+    search_tree->trav_bfs(print_action);
+    cout << endl;
 
     treenode_t<int> *searched_node = search_tree->search_value(88);
     cout << "搜索元素: "
@@ -48,15 +57,6 @@ int main()
     search_tree->push(19);
     search_tree->push(18);
     search_tree->push(20);
-    search_tree->print_tree();
-
-    search_tree->remove(19);
-    search_tree->remove(18);
-    search_tree->remove(20);
-    search_tree->print_tree();
-    search_tree->remove(1);
-    search_tree->remove(2);
-    search_tree->remove(4);
     search_tree->print_tree();
 
     return 0;

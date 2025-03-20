@@ -10,6 +10,8 @@
 
 
 /*
+
+// ************* treenode_t *************
 template <typename T>
 class treenode_t {
 public:
@@ -20,18 +22,54 @@ public:
     T value;
 
 public:
-    treenode_t() {}
-    treenode_t(T value) : value(value) {}
+    treenode_t(T value);
 
-    void hangleft(treenode_t *newparent);
-    void hangright(treenode_t *newparent);
+    void hookleft(treenode_t *newparent);
+    void hookright(treenode_t *newparent);
 
     void addleft(treenode_t *child);
     void addleft(T val);
     void addright(treenode_t *child);
     void addright(T val);
-    int get_degree();
+    uint_t get_height();
+    uint_t get_degree();
 };
+
+// ************* bintree_T *************
+template <typename T>
+class bintree_t {
+public:
+    using trav_action_t = std::function<void (treenode_t<T> *, uint_t, left_or_right_e)>;
+
+public:
+    treenode_t<T> *root     = nullptr;
+
+public:
+    bintree_t(bool init = false);
+    ~bintree_t();
+
+    void trav_bfs(trav_action_t action);
+    void trav_pre(trav_action_t action);
+    void trav_in(trav_action_t action);
+    void trav_post(trav_action_t action);
+
+    void print_tree();
+};
+
+// ************* search_tree_t *************
+template <typename T,
+          typename Compare_T = std::less<T>,
+          typename Equal_T = std::equal_to<T> >
+class search_tree_t : public bintree_t<T> {
+public:
+    search_tree_t(bool init);
+    treenode_t<T> *search_value(T val);
+
+    void push(T val);
+    void remote(T val);
+    void erase(treenode_t<T> *node);
+};
+
 */
 
 using uint_t = uint64_t;
@@ -76,12 +114,12 @@ public:
         this->addright(new treenode_t(val));
     }
 
-    uint_t get_degree() {
-        uint_t degree_max = 0;
+    uint_t get_height() {
+        uint_t height = 0;
 
         std::function<void (treenode_t*, uint_t)> traversal =
             [&] (treenode_t *node, uint_t level) {
-                if (level > degree_max) degree_max = level;
+                if (level > height) height = level;
                 if (node->left)
                     traversal(node->left, ++level);
                 if (node->right)
@@ -89,7 +127,15 @@ public:
             };
         traversal(this, 0);
 
-        return degree_max;
+        return height;
+    }
+
+    uint_t get_degree() {
+        if (this->left && this->right)
+            return 2;
+        else if (this->left || this->right)
+            return 1;
+        else return 0;
     }
 };
 
@@ -128,7 +174,7 @@ public:
 
     ~bintree_t() {
         std::list<treenode_t<T> *> todel;
-        this->iter_bfs([&](treenode_t<T> *node, int) {
+        this->trav_bfs([&](treenode_t<T> *node, uint_t, left_or_right_e) {
             todel.push_back(node);
         });
     
