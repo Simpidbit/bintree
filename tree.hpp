@@ -54,6 +54,9 @@ public:
     void trav_post(trav_action_t action);
 
     void print_tree();
+
+    void rotate_right(treenode_t<T> *node);
+    void rotate_left(treenode_t<T> *node);
 };
 
 // ************* search_tree_t *************
@@ -136,6 +139,18 @@ public:
         else if (this->left || this->right)
             return 1;
         else return 0;
+    }
+
+    int get_balance_factor() {
+        int left_bfactor = 0;
+        int right_bfactor = 0;
+
+        if (this->left)
+            left_bfactor = this->left->get_height();
+        if (this->right)
+            right_bfactor = this->right->get_height();
+
+        return left_bfactor - right_bfactor;
     }
 };
 
@@ -268,6 +283,39 @@ public:
         );
         std::cout << "OK." << std::endl;
     }
+
+    void rotate_right(treenode_t<T> *node) {
+        // 判断是否可以右旋
+        if (!node->left) return;
+
+        if (node == this->root) {
+            // 根节点
+            this->root = node->left;
+            node->left = this->root->right;
+            this->root->right = node;
+            node->parent = this->root;
+        } else {
+            if (this->parent->left == node) {
+                // 是父节点的左子节点
+                this->parent->left = node->left;
+                node->left = this->parent->left->right;
+                node->parent = this->parent->left;
+                this->parent->left->right = node;
+            } else if (this->parent->right == node) {
+                // 是父节点的右子节点
+            }
+        }
+    }
+
+    void rotate_left(treenode_t<T> *node) {
+        // 判断是否可以左旋
+        if (!node->right) return;
+
+        if (node == this->root) {
+            // 根节点
+        } else {
+        }
+    }
 };
 
 template <typename T,
@@ -399,6 +447,13 @@ public:
             }
         }
     }
+};
+
+
+template <typename T,
+          typename Compare_T = std::less<T>,
+          typename Equal_T = std::equal_to<T> >
+class AVL_tree : public search_tree_t<T> {
 };
 
 #endif  // BINTREE_TREE_HPP

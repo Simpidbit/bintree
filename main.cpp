@@ -59,5 +59,9 @@ int main()
     search_tree->push(20);
     search_tree->print_tree();
 
+    auto ptr = search_tree->search_value(15);
+    if (ptr)
+        cout << "ptr bf: " << ptr->get_balance_factor() << endl;
+
     return 0;
 }
