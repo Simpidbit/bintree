@@ -51,8 +51,6 @@ bintree_t::iter_bfs(iter_fun_t action)
         if (node->right) 
             dq.push_back(node->right);
     }
-
-    cout << endl;
 }
 
 void
