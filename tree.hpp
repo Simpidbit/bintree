@@ -9,6 +9,7 @@
 #include <cstdint>
 
 
+
 /*
 
 // ************* treenode_t *************
@@ -284,36 +285,105 @@ public:
         std::cout << "OK." << std::endl;
     }
 
-    void rotate_right(treenode_t<T> *node) {
-        // 判断是否可以右旋
-        if (!node->left) return;
+    /*
+    node:
+        左节点 == null
+            (不可右旋)
+            返回
+        左节点 != null
+            (可以右旋)
+            父节点 == null
+                (node是根节点)
+                根节点 = 左子
 
-        if (node == this->root) {
-            // 根节点
-            this->root = node->left;
-            node->left = this->root->right;
-            this->root->right = node;
-            node->parent = this->root;
+                tmp = 左子->右子
+                左子->右子 = node
+                node->左子 = tmp
+
+            父节点 != null
+                (node不是根节点)
+                父->(左/右)子 = 左子
+
+                tmp = 左子->右子
+                左子->右子 = node
+                node->左子 = tmp
+    */
+    void rotate_right(treenode_t<T> *node) {
+        if (!node->left) {
+            // 不可右旋
+            std::cout << "不可右旋!!!" << std::endl;
+            return;
         } else {
-            if (this->parent->left == node) {
-                // 是父节点的左子节点
-                this->parent->left = node->left;
-                node->left = this->parent->left->right;
-                node->parent = this->parent->left;
-                this->parent->left->right = node;
-            } else if (this->parent->right == node) {
-                // 是父节点的右子节点
+            // 可以右旋
+            if (!node->parent) {
+                // node 是根节点
+                this->root = node->left;
+
+                treenode_t<T> *tmp = node->left->right;
+                node->left->right = node;
+                node->left = tmp;
+            } else {
+                // node 不是根节点
+                if (node->parent->left == node) {
+                    node->parent->left = node->left;
+                } else {
+                    node->parent->right = node->left;
+                }
+
+                treenode_t<T> *tmp = node->left->right;
+                node->left->right = node;
+                node->left = tmp;
             }
         }
     }
 
-    void rotate_left(treenode_t<T> *node) {
-        // 判断是否可以左旋
-        if (!node->right) return;
+    /*
+    node:
+        右节点 == null
+            (不可左旋)
+        右节点 != null
+            (可以左旋)
+            父节点 == null
+                (node是根节点)
+                根节点 = 右子
 
-        if (node == this->root) {
-            // 根节点
+                tmp = 右子->左子
+                右子->左子 = node
+                右子 = tmp
+            父节点 != null
+                (node不是根节点)
+                父->(左/右)子 = 右子
+
+                tmp = 右子->左子
+                右子->左子 = node
+                右子 = tmp
+    */
+    void rotate_left(treenode_t<T> *node) {
+        if (!node->right) {
+            // 不可左旋
+            std::cout << "不可左旋!!!" << std::endl;
+            return;
         } else {
+            // 可以左旋
+            if (!node->parent) {
+                // node是根节点
+                this->root = node->right;
+
+                treenode_t<T> *tmp = node->right->left;
+                node->right->left = node;
+                node->right = tmp;
+            } else {
+                // node不是根节点
+                if (node->parent->left == node) {
+                    node->parent->left = node->right;
+                } else {
+                    node->parent->right = node->right;
+                }
+
+                treenode_t<T> *tmp = node->right->left;
+                node->right->left = node;
+                node->right = tmp;
+            }
         }
     }
 };

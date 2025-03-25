@@ -63,5 +63,12 @@ int main()
     if (ptr)
         cout << "ptr bf: " << ptr->get_balance_factor() << endl;
 
+    cout << "右旋测试 ==========" << endl;
+    cout << "输入右旋节点: " << endl;
+    int target = 0;
+    cin >> target;
+    search_tree->rotate_right(search_tree->search_value(target));
+    search_tree->print_tree();
+
     return 0;
 }
