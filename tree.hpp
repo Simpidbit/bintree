@@ -11,8 +11,9 @@
 
 
 /*
-
+// **************************************
 // ************* treenode_t *************
+// **************************************
 template <typename T>
 class treenode_t {
 public:
@@ -34,19 +35,29 @@ public:
     void addright(T val);
     uint_t get_height();
     uint_t get_degree();
+    int get_balance_factor();
 };
 
+typedef enum {
+    NODE_ROOT = 0,
+    NODE_LEFT,
+    NODE_RIGHT
+} left_or_right_e;
+
+// *************************************
 // ************* bintree_T *************
+// *************************************
 template <typename T>
 class bintree_t {
 public:
     using trav_action_t = std::function<void (treenode_t<T> *, uint_t, left_or_right_e)>;
+    using node_type = treenode_t<T>;
 
 public:
-    treenode_t<T> *root     = nullptr;
+    treenode_t<T> *root = nullptr;
 
 public:
-    bintree_t(bool init = false);
+    bintree_t() = default;
     ~bintree_t();
 
     void trav_bfs(trav_action_t action);
@@ -60,17 +71,33 @@ public:
     void rotate_left(treenode_t<T> *node);
 };
 
+// *****************************************
 // ************* search_tree_t *************
+// *****************************************
 template <typename T,
           typename Compare_T = std::less<T>,
           typename Equal_T = std::equal_to<T> >
 class search_tree_t : public bintree_t<T> {
 public:
-    search_tree_t(bool init);
+    search_tree_t() = default;
     treenode_t<T> *search_value(T val);
+    treenode_t<T> *push(T val);
+    void remove(T val);
+    treenode_t<T> *erase(treenode_t<T> *node);
+};
 
-    void push(T val);
-    void remote(T val);
+// ************************************
+// ************* AVL_tree *************
+// ************************************
+template <typename T,
+          typename Compare_T = std::less<T>,
+          typename Equal_T = std::equal_to<T> >
+class AVL_tree : public search_tree_t<T> {
+public:
+    AVL_tree() = default;
+
+    treenode_t<T> *rotate(treenode_t<T> *node);
+    treenode_t<T> *push(T val);
     void erase(treenode_t<T> *node);
 };
 
@@ -105,13 +132,13 @@ public:
         child->parent = this;
     }
 
+    void addleft(T val) {
+        this->addleft(new treenode_t(val));
+    }
+
     void addright(treenode_t *child) {
         this->right = child;
         child->parent = this;
-    }
-
-    void addleft(T val) {
-        this->addleft(new treenode_t(val));
     }
 
     void addright(T val) {
@@ -122,12 +149,12 @@ public:
         uint_t height = 0;
 
         std::function<void (treenode_t*, uint_t)> traversal =
-            [&] (treenode_t *node, uint_t level) {
+            [&] (treenode_t *node, uint_t level) -> void {
                 if (level > height) height = level;
                 if (node->left)
-                    traversal(node->left, ++level);
+                    traversal(node->left, level + 1);
                 if (node->right)
-                    traversal(node->right, ++level);
+                    traversal(node->right, level + 1);
             };
         traversal(this, 0);
 
@@ -147,9 +174,9 @@ public:
         int right_bfactor = 0;
 
         if (this->left)
-            left_bfactor = this->left->get_height();
+            left_bfactor = this->left->get_height() + 1;
         if (this->right)
-            right_bfactor = this->right->get_height();
+            right_bfactor = this->right->get_height() + 1;
 
         return left_bfactor - right_bfactor;
     }
@@ -165,6 +192,8 @@ template <typename T>
 class bintree_t {
 public:
     using trav_action_t = std::function<void (treenode_t<T> *, uint_t, left_or_right_e)>;
+    using node_type = treenode_t<T>;
+    using value_type = T;
 
 public:
     treenode_t<T> *root = nullptr;
@@ -176,18 +205,7 @@ public:
     4       5       6       7
 
     */
-    bintree_t(bool init = false) {
-        if (init) {
-            this->root = new treenode_t<T>(1);
-            this->root->addleft(2);
-            this->root->addright(3);
-            this->root->left->addleft(4);
-            this->root->left->addright(5);
-            this->root->right->addleft(6);
-            this->root->right->addright(7);
-        }
-    }
-
+    bintree_t() = default;
     ~bintree_t() {
         std::list<treenode_t<T> *> todel;
         this->trav_bfs([&](treenode_t<T> *node, uint_t, left_or_right_e) {
@@ -318,20 +336,25 @@ public:
             if (!node->parent) {
                 // node 是根节点
                 this->root = node->left;
+                node->left->parent = nullptr;
 
                 treenode_t<T> *tmp = node->left->right;
                 node->left->right = node;
+                node->parent = node->left;
                 node->left = tmp;
             } else {
                 // node 不是根节点
                 if (node->parent->left == node) {
                     node->parent->left = node->left;
+                    node->left->parent = node->parent;
                 } else {
                     node->parent->right = node->left;
+                    node->left->parent = node->parent;
                 }
 
                 treenode_t<T> *tmp = node->left->right;
                 node->left->right = node;
+                node->parent = node->left;
                 node->left = tmp;
             }
         }
@@ -368,20 +391,25 @@ public:
             if (!node->parent) {
                 // node是根节点
                 this->root = node->right;
+                node->right->parent = nullptr;
 
                 treenode_t<T> *tmp = node->right->left;
                 node->right->left = node;
+                node->parent = node->right;
                 node->right = tmp;
             } else {
                 // node不是根节点
                 if (node->parent->left == node) {
                     node->parent->left = node->right;
+                    node->right->parent = node->parent;
                 } else {
                     node->parent->right = node->right;
+                    node->right->parent = node->parent;
                 }
 
                 treenode_t<T> *tmp = node->right->left;
                 node->right->left = node;
+                node->parent = node->right;
                 node->right = tmp;
             }
         }
@@ -393,28 +421,7 @@ template <typename T,
           typename Equal_T = std::equal_to<T> >
 class search_tree_t : public bintree_t<T> {
 public:
-    search_tree_t(bool init) {
-        if (init) {
-            this->root = new treenode_t<T>(8);
-
-            this->root->addleft(4);
-            this->root->addright(12);
-
-            this->root->left->addleft(2);
-            this->root->left->addright(6);
-            this->root->right->addleft(10);
-            this->root->right->addright(14);
-
-            this->root->left->left->addleft(1);
-            this->root->left->left->addright(3);
-            this->root->left->right->addleft(5);
-            this->root->left->right->addright(7);
-            this->root->right->left->addleft(9);
-            this->root->right->left->addright(11);
-            this->root->right->right->addleft(13);
-            this->root->right->right->addright(15);
-        }
-    }
+    search_tree_t() = default;
 
     treenode_t<T> *search_value(T val) {
         treenode_t<T> *cur = this->root;
@@ -434,21 +441,22 @@ public:
         }
     }
 
-    void push(T val) {
+    treenode_t<T>* push(T val) {
         treenode_t<T> *cur = this->root;
 
         for (;;) {
-            if (Equal_T{}(cur->value, val)) return;
+            if (Equal_T{}(cur->value, val)) return nullptr;
+
             if (Compare_T{}(cur->value, val)) {
                 if (!cur->right) {
                     cur->addright(val);
-                    return;
+                    return cur->right;
                 }
                 cur = cur->right;
             } else {
                 if (!cur->left) {
                     cur->addleft(val);
-                    return;
+                    return cur->left;
                 }
                 cur = cur->left;
             }
@@ -461,7 +469,7 @@ public:
             this->erase(node);
     }
 
-    void erase(treenode_t<T> *node) {
+    treenode_t<T> *erase(treenode_t<T> *node) {
         // 先确定此节点的度
         uint_t degree = node->get_degree();
         if (degree == 0) {
@@ -473,16 +481,19 @@ public:
             else 
                 node->parent->right = nullptr;
             delete node;
+            return nullptr;
         } else if (degree == 1) {
             // 让子节点上来
             if (node->left) {
                 node->value = node->left->value;
                 delete node->left;
                 node->left = nullptr;
+                return node;
             } else {
                 node->value = node->right->value;
                 delete node->right;
                 node->right = nullptr;
+                return node;
             }
         } else {
             // 左子树的最大节点或者右子树的最小节点
@@ -500,7 +511,8 @@ public:
                 else
                     left_max->parent->right = nullptr;
                 delete left_max;
-            } else {
+                return node;
+            } /* else {
                 // 右子树的最小节点
                 treenode_t<T> *right_min = node->right;
                 for (;;) {
@@ -514,7 +526,7 @@ public:
                 else
                     right_min->parent->right = nullptr;
                 delete right_min;
-            }
+            } */
         }
     }
 };
@@ -524,6 +536,64 @@ template <typename T,
           typename Compare_T = std::less<T>,
           typename Equal_T = std::equal_to<T> >
 class AVL_tree : public search_tree_t<T> {
+public:
+    AVL_tree() = default;
+
+    treenode_t<T> *rotate(treenode_t<T> *node) {
+        int balance_factor = node->get_balance_factor();
+        int child_balance_factor;
+        if (balance_factor > 1) {
+            // 左偏树
+            child_balance_factor = node->left->get_balance_factor();
+            if (child_balance_factor < 0) {
+                // 先左旋，后右旋
+                this->rotate_left(node->left);
+                this->rotate_right(node);
+            } else {
+                // 直接右旋
+                this->rotate_right(node);
+            }
+            return node->parent;
+        } else if (balance_factor < -1) {
+            // 右偏树
+            child_balance_factor = node->right->get_balance_factor();
+            if (child_balance_factor > 0) {
+                // 先右旋，后左旋
+                this->rotate_right(node->right);
+                this->rotate_left(node);
+            } else {
+                // 直接左旋
+                this->rotate_left(node);
+            }
+            return node->parent;
+        } else {
+            return node;
+        }
+    }
+
+    treenode_t<T> *push(T val) {
+        treenode_t<T> *newnode = dynamic_cast<search_tree_t<T> *>(this)->push(val);
+        if (!newnode) return nullptr;
+
+        // 自底向上旋转
+        treenode_t<T> *cur = newnode;
+        for (;;) {
+            if (cur == nullptr) break;
+            this->rotate(cur);
+            cur = cur->parent;
+        }
+        return newnode;
+    }
+
+    void erase(treenode_t<T> *node) {
+        treenode_t<T> *delnode = dynamic_cast<search_tree_t<T> *>(this)->erase(node);
+        treenode_t<T> *cur = delnode;
+        for (;;) {
+            if (cur == nullptr) break;
+            this->rotate(cur);
+            cur = cur->parent;
+        }
+    }
 };
 
 #endif  // BINTREE_TREE_HPP
