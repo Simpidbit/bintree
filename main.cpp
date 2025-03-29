@@ -1,12 +1,8 @@
 #include <iostream>
+
+#define DEBUG
+
 #include "tree.hpp"
-
-/*
-               1
-        2               3
-    4       5       6       7
-
-*/
 
 using std::cout;
 using std::endl;
@@ -20,27 +16,17 @@ int main()
         cout << node->value << ", ";
     };
 
-    tree.root = new decltype(tree)::node_type(10);
-    tree.root->addleft(2);
-    tree.root->addright(30);
-    tree.print_tree();
+#define NEWNODE(val) \
+    treenode_t<int> *node##val = new treenode_t<int>(val);
 
-    tree.trav_bfs(print_action);
-    cout << endl;
-    tree.trav_pre(print_action);
-    cout << endl;
-    tree.trav_in(print_action);
-    cout << endl;
-    tree.trav_post(print_action);
-    cout << endl;
-
-    tree.rotate_right(tree.root);
-    tree.print_tree();
-    tree.rotate_left(tree.root);
-    tree.print_tree();
-    tree.rotate_left(tree.root);
-    tree.print_tree();
-
+    NEWNODE(1)
+    NEWNODE(2)
+    NEWNODE(3)
+    NEWNODE(4)
+    NEWNODE(5)
+    NEWNODE(6)
+    NEWNODE(7)
+    NEWNODE(8)
 
     return 0;
 }

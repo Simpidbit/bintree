@@ -69,6 +69,10 @@ public:
 
     void rotate_right(treenode_t<T> *node);
     void rotate_left(treenode_t<T> *node);
+
+#ifdef DEBUG
+    treenode_t<T> *search_only(T val);
+#endif
 };
 
 // *****************************************
@@ -116,6 +120,16 @@ public:
 
 public:
     treenode_t(T value) : value(value) {}
+    treenode_t(treenode_t &&node) {
+        this->left = node.left;
+        this->right = node.right;
+        this->parent = node.parent;
+        this->value = node.value;
+
+        node.left   = nullptr;
+        node.right  = nullptr;
+        node.parent = nullptr;
+    }
 
     void hookleft(treenode_t *newparent) {
         newparent->left = this;
@@ -325,8 +339,18 @@ public:
                 tmp = 左子->右子
                 左子->右子 = node
                 node->左子 = tmp
+
+    | node | L | L->L | L->R | R | R->L | R->R | P | YESorNO
+        0    *    *      *     *    *      *     *      0
+        1    0    *      *     *    *      *     *      0
+        1    1
     */
     void rotate_right(treenode_t<T> *node) {
+        if (!node) {
+            std::cout << "不可对nullptr右旋!" << std::endl;
+            return;
+        }
+
         if (!node->left) {
             // 不可右旋
             std::cout << "不可右旋!!!" << std::endl;
@@ -380,8 +404,17 @@ public:
                 tmp = 右子->左子
                 右子->左子 = node
                 右子 = tmp
+
+    | node | L | L->L | L->R | R | R->L | R->R | P | YESorNO
+        0    *    *      *     *    *      *     *      0
+        1    *    *      *     0    *      *     *      0
     */
     void rotate_left(treenode_t<T> *node) {
+        if (!node) {
+            std::cout << "不可对nullptr左旋!" << std::endl;
+            return;
+        }
+
         if (!node->right) {
             // 不可左旋
             std::cout << "不可左旋!!!" << std::endl;
@@ -414,6 +447,19 @@ public:
             }
         }
     }
+
+#ifdef DEBUG
+    treenode_t<T> * operator[](T val) {
+        treenode_t<T> *target = nullptr;
+        this->trav_bfs([&](treenode_t<T> *node, uint_t, left_or_right_e) -> void {
+            if (node->value == val) {
+                target = node;
+                return;
+            }
+        });
+        return target;
+    }
+#endif
 };
 
 template <typename T,
