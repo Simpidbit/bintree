@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 
 #define DEBUG
 
@@ -8,6 +9,7 @@ using std::cout;
 using std::endl;
 using std::cin;
 
+
 int main()
 {
     auto print_action = [] (treenode_t<int> *node, uint_t level, left_or_right_e) {
@@ -15,6 +17,7 @@ int main()
     };
 
     AVL_tree<int> tree;
+    //AVL_tree<int> tree([] (const int &a, const int &b) -> bool {return a > b;});
 
     for (;;) {
         int oper, val;

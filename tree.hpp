@@ -78,12 +78,20 @@ public:
 // *****************************************
 // ************* search_tree_t *************
 // *****************************************
-template <typename T,
-          typename Compare_T = std::less<T>,
-          typename Equal_T = std::equal_to<T> >
+template <typename T>
 class search_tree_t : public bintree_t<T> {
+protected:
+    std::function<bool (const T &a, const T &b)> comparer
+        = [] (const T &a, const T &b) -> bool { return a < b; };
+    std::function<bool (const T &a, const T &b)> equaler
+        = [] (const T &a, const T &b) -> bool { return a == b; };
+
 public:
     search_tree_t() = default;
+    search_tree_t(decltype(comparer) cmp) : comparer(cmp);
+    search_tree_t(decltype(comparer) cmp, decltype(equaler) eql) 
+        : comparer(cmp), equaler(eql);
+
     treenode_t<T> *search_value(T val);
     treenode_t<T> *push(T val);
     void remove(T val);
@@ -93,12 +101,14 @@ public:
 // ************************************
 // ************* AVL_tree *************
 // ************************************
-template <typename T,
-          typename Compare_T = std::less<T>,
-          typename Equal_T = std::equal_to<T> >
+template <typename T>
 class AVL_tree : public search_tree_t<T> {
 public:
     AVL_tree() = default;
+    template <typename Cmp_T>
+    AVL_tree(Cmp_T &&cmp) : search_tree_t<T>(std::forward<Cmp_T>(cmp));
+    template <typename Cmp_T, typename Eql_T>
+    AVL_tree(Cmp_T &&cmp, Eql_T &&eql) : search_tree_t<T>(std::forward<Cmp_T, Eql_T>(cmp, eql));
 
     treenode_t<T> *rotate(treenode_t<T> *node);
     treenode_t<T> *push(T val);
@@ -479,12 +489,20 @@ public:
 #endif
 };
 
-template <typename T,
-          typename Compare_T = std::less<T>,
-          typename Equal_T = std::equal_to<T> >
+template <typename T>
 class search_tree_t : public bintree_t<T> {
+protected:
+    std::function<bool (const T &a, const T &b)> comparer
+        = [] (const T &a, const T &b) -> bool { return a < b; };
+    std::function<bool (const T &a, const T &b)> equaler
+        = [] (const T &a, const T &b) -> bool { return a == b; };
+
 public:
     search_tree_t() = default;
+
+    search_tree_t(decltype(comparer) cmp) : comparer(cmp) {}
+    search_tree_t(decltype(comparer) cmp, decltype(equaler) eql) 
+        : comparer(cmp), equaler(eql) {}
 
     treenode_t<T> *search_value(T val) {
         treenode_t<T> *cur = this->root;
@@ -493,10 +511,10 @@ public:
             if (cur == nullptr)
                 return cur;
 
-            if (Equal_T{}(cur->value, val)) 
+            if (this->equaler(cur->value, val)) 
                 return cur;
             else {
-                if (Compare_T{}(cur->value, val))
+                if (this->comparer(cur->value, val))
                     cur = cur->right;
                 else 
                     cur = cur->left;
@@ -508,9 +526,9 @@ public:
         treenode_t<T> *cur = this->root;
 
         for (;;) {
-            if (Equal_T{}(cur->value, val)) return nullptr;
+            if (this->equaler(cur->value, val)) return nullptr;
 
-            if (Compare_T{}(cur->value, val)) {
+            if (this->comparer(cur->value, val)) {
                 if (!cur->right) {
                     cur->addright(val);
                     return cur->right;
@@ -549,12 +567,14 @@ public:
         } else if (degree == 1) {
             // 让子节点上来
             if (node->left) {
-                node->value = node->left->value;
+                node->value = std::move(node->left->value);
+
                 delete node->left;
                 node->left = nullptr;
                 return node;
             } else {
-                node->value = node->right->value;
+                node->value = std::move(node->right->value);
+
                 delete node->right;
                 node->right = nullptr;
                 return node;
@@ -573,7 +593,6 @@ public:
                     left_max = left_max->right;
                 else break;
             }
-            node->value = left_max->value;
             if (left_max->parent->left == left_max) {
                 // 出现这种情况，只可能是left_max是node->left
                 // left_max没有right
@@ -587,6 +606,7 @@ public:
                 if (left_max->left)
                     left_max->left->parent = left_max->parent;
             }
+            node->value = std::move(left_max->value);
             delete left_max;
             return node;
         }
@@ -594,12 +614,16 @@ public:
 };
 
 
-template <typename T,
-          typename Compare_T = std::less<T>,
-          typename Equal_T = std::equal_to<T> >
+template <typename T>
 class AVL_tree : public search_tree_t<T> {
 public:
     AVL_tree() = default;
+
+    template <typename Cmp_T>
+    AVL_tree(Cmp_T &&cmp) : search_tree_t<T>(std::forward<Cmp_T>(cmp)) {}
+
+    template <typename Cmp_T, typename Eql_T>
+    AVL_tree(Cmp_T &&cmp, Eql_T &&eql) : search_tree_t<T>(std::forward<Cmp_T, Eql_T>(cmp, eql)) {}
 
     treenode_t<T> *rotate(treenode_t<T> *node) {
         int balance_factor = node->get_balance_factor();
