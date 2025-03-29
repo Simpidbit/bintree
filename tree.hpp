@@ -103,6 +103,7 @@ public:
     treenode_t<T> *rotate(treenode_t<T> *node);
     treenode_t<T> *push(T val);
     void erase(treenode_t<T> *node);
+    void remove(T val);
 };
 
 */
@@ -232,6 +233,7 @@ public:
 
     /* 层序遍历 */
     void trav_bfs(trav_action_t action) {
+        if (!this->root) return;
         using std::deque;
         deque<treenode_t<T> *> dq;
 
@@ -251,6 +253,7 @@ public:
 
     /* 前序遍历 */
     void trav_pre(trav_action_t action) {
+        if (!this->root) return;
         std::function<void (treenode_t<T> *, trav_action_t, uint_t, left_or_right_e)> recur_trav = 
             [&] (treenode_t<T> *node, trav_action_t action, uint_t level, left_or_right_e lorr) -> void {
                 action(node, level, lorr);
@@ -265,6 +268,7 @@ public:
 
     /* 中序遍历 */
     void trav_in(trav_action_t action) {
+        if (!this->root) return;
         std::function<void (treenode_t<T> *, trav_action_t, uint_t, left_or_right_e)> recur_trav = 
             [&] (treenode_t<T> *node, trav_action_t action, uint_t level, left_or_right_e lorr) -> void {
                 if (node->left)
@@ -280,6 +284,7 @@ public:
 
     /* 后序遍历 */
     void trav_post(trav_action_t action) {
+        if (!this->root) return;
         std::function<void (treenode_t<T> *, trav_action_t, uint_t, left_or_right_e)> recur_trav = 
             [&] (treenode_t<T> *node, trav_action_t action, uint_t level, left_or_right_e lorr) -> void {
                 if (node->left)
@@ -311,10 +316,14 @@ public:
                     break;
                 default:;
                 }
-                std::cout << node->value << std::endl;
+                std::cout << node->value;
+                if (node->parent)
+                    std::cout << " |P " << node->parent->value << std::endl;
+                else
+                    std::cout << " |P NUL" << std::endl;
             }
         );
-        std::cout << "OK." << std::endl;
+        std::cout << "Print OK." << std::endl;
     }
 
     /*
@@ -366,6 +375,8 @@ public:
                 node->left->right = node;
                 node->parent = node->left;
                 node->left = tmp;
+                if (tmp)
+                    tmp->parent = node;
             } else {
                 // node 不是根节点
                 if (node->parent->left == node) {
@@ -380,6 +391,8 @@ public:
                 node->left->right = node;
                 node->parent = node->left;
                 node->left = tmp;
+                if (tmp)
+                    tmp->parent = node;
             }
         }
     }
@@ -430,6 +443,8 @@ public:
                 node->right->left = node;
                 node->parent = node->right;
                 node->right = tmp;
+                if (tmp)
+                    tmp->parent = node;
             } else {
                 // node不是根节点
                 if (node->parent->left == node) {
@@ -444,6 +459,8 @@ public:
                 node->right->left = node;
                 node->parent = node->right;
                 node->right = tmp;
+                if (tmp)
+                    tmp->parent = node;
             }
         }
     }
@@ -511,6 +528,7 @@ public:
 
     void remove(T val) {
         treenode_t<T> *node = this->search_value(val);
+        if (!node) return;
         if (node)
             this->erase(node);
     }
@@ -521,7 +539,7 @@ public:
         if (degree == 0) {
             // 直接删
             if (!node->parent) // 根节点
-                ;
+                this->root = nullptr;
             else if (node->parent->left == node)
                 node->parent->left = nullptr;
             else 
@@ -542,37 +560,35 @@ public:
                 return node;
             }
         } else {
-            // 左子树的最大节点或者右子树的最小节点
-            if (node->left) {
-                // 左子树的最大节点
-                treenode_t<T> *left_max = node->left;
-                for (;;) {
-                    if (left_max->right)
-                        left_max = left_max->right;
-                    else break;
-                }
-                node->value = left_max->value;
-                if (left_max->parent->left == left_max)
-                    left_max->parent->left = nullptr;
-                else
-                    left_max->parent->right = nullptr;
-                delete left_max;
-                return node;
-            } /* else {
-                // 右子树的最小节点
-                treenode_t<T> *right_min = node->right;
-                for (;;) {
-                    if (right_min->left)
-                        right_min = right_min->left;
-                    else break;
-                }
-                node->value = right_min->value;
-                if (right_min->parent->left == right_min)
-                    right_min->parent->left = nullptr;
-                else
-                    right_min->parent->right = nullptr;
-                delete right_min;
-            } */
+            /*
+                以左子树的最大节点(left_max)替换此被删除的节点
+                ml存在:
+                    mp继承ml
+                mr存在:
+                    不可能，因为m不会存在r
+            */
+            treenode_t<T> *left_max = node->left;
+            for (;;) {
+                if (left_max->right)
+                    left_max = left_max->right;
+                else break;
+            }
+            node->value = left_max->value;
+            if (left_max->parent->left == left_max) {
+                // 出现这种情况，只可能是left_max是node->left
+                // left_max没有right
+                node->left = left_max->left;
+                if (left_max->left)
+                    left_max->left->parent = node;
+            } else  {
+                // 是父节点右子
+                // left_max没有right
+                left_max->parent->right = left_max->left;
+                if (left_max->left)
+                    left_max->left->parent = left_max->parent;
+            }
+            delete left_max;
+            return node;
         }
     }
 };
@@ -618,6 +634,11 @@ public:
     }
 
     treenode_t<T> *push(T val) {
+        if (this->root == nullptr) {
+            this->root = new treenode_t<T>(val);
+            return this->root;
+        }
+
         treenode_t<T> *newnode = dynamic_cast<search_tree_t<T> *>(this)->push(val);
         if (!newnode) return nullptr;
 
@@ -632,6 +653,7 @@ public:
     }
 
     void erase(treenode_t<T> *node) {
+        if (!node) return;
         treenode_t<T> *delnode = dynamic_cast<search_tree_t<T> *>(this)->erase(node);
         treenode_t<T> *cur = delnode;
         for (;;) {
@@ -639,6 +661,10 @@ public:
             this->rotate(cur);
             cur = cur->parent;
         }
+    }
+
+    void remove(T val) {
+        this->erase(this->search_value(val));
     }
 };
 

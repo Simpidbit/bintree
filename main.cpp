@@ -10,23 +10,26 @@ using std::cin;
 
 int main()
 {
-    bintree_t<int> tree;
-
     auto print_action = [] (treenode_t<int> *node, uint_t level, left_or_right_e) {
         cout << node->value << ", ";
     };
 
-#define NEWNODE(val) \
-    treenode_t<int> *node##val = new treenode_t<int>(val);
+    AVL_tree<int> tree;
 
-    NEWNODE(1)
-    NEWNODE(2)
-    NEWNODE(3)
-    NEWNODE(4)
-    NEWNODE(5)
-    NEWNODE(6)
-    NEWNODE(7)
-    NEWNODE(8)
+    for (;;) {
+        int oper, val;
+        cout << "Insert a oper-value: ";
+        cin >> oper >> val;
+        switch (oper) {
+            case 0: 
+                    tree.push(val);
+                    break;
+            case 1:
+                    tree.remove(val);
+                    break;
+        }
+        tree.print_tree();
+    }
 
     return 0;
 }
