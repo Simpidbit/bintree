@@ -862,6 +862,9 @@ class RB_tree_t : public search_tree_t<T, node_T> {
 private:
     using base_type = search_tree_t<T, node_T>;
 
+    void maintain(node_T *node) {
+    }
+
 public:
     RB_tree_t() = default;
     RB_tree_t(typename base_type::comparer_type cmp)
@@ -872,59 +875,57 @@ public:
 
     [[noreturn]]
     node_T *rotate(node_T *node) {
+        if (node == this->root) {
+            node->color = node_T::COLOR_BLACK;
+        } else if (node->parent()->color == node_T::COLOR_BLACK) {
+            node->color = node_T::COLOR_RED;
+        } else {// 父节点是红色，一定有黑色祖父节点
+            node_T *uncle = this->get_sibling(node->parent());
+            node_T *grandparent = node->parent()->parent();
+            bool is_uncle_black = false;
+            if (!uncle)
+                is_uncle_black = true;
+            else if (uncle->color == node_T::COLOR_BLACK) 
+                is_uncle_black = true;
+
+            if (is_uncle_black) {
+                // 叔节点是黑色 NIL
+                // 我红，父黑，祖红，旋转祖
+                node->color = node_T::COLOR_RED;
+                node->parent()->color = node_T::COLOR_BLACK;
+                grandparent->color = node_T::COLOR_RED;
+
+                grandparent->get_height();
+                
+                if (node == node->parent()->left()
+                 && node->parent() == grandparent->left()) {
+                    this->rotate_right(grandparent);
+                } else if (node == node->parent()->right()
+                        && node->parent() == grandparent->left()) {
+                    this->rotate_left(node->parent());
+                    this->rotate_right(grandparent);
+                } else if (node == node->parent()->left()
+                        && node->parent() == grandparent->right()) {
+                    this->rotate_right(node->parent());
+                    this->rotate_left(grandparent);
+             /* } else if (node == node->parent()->right() 
+                        && node->parent() == grandparent->right()) { */
+                } else {
+                    this->rotate_left(grandparent);
+                }
+            } else {
+                // 叔节点是红色
+                node->color = node_T::COLOR_RED;
+                node->parent()->color = node_T::COLOR_BLACK;
+                uncle->color = node_T::COLOR_BLACK;
+                this->maintain(grandparent);
+            }
+        }
     }
 
     node_T *push(T val) {
-        std::function<void (node_T *)> maintain = [&](node_T *node) {
-            if (node == this->root) {
-                node->color = node_T::COLOR_BLACK;
-            } else if (node->parent()->color == node_T::COLOR_BLACK) {
-                node->color = node_T::COLOR_RED;
-            } else {// 父节点是红色，一定有黑色祖父节点
-                node_T *uncle = this->get_sibling(node->parent());
-                node_T *grandparent = node->parent()->parent();
-                bool is_uncle_black = false;
-                if (!uncle)
-                    is_uncle_black = true;
-                else if (uncle->color == node_T::COLOR_BLACK) 
-                    is_uncle_black = true;
-
-                if (is_uncle_black) {
-                    // 叔节点是黑色 NIL
-                    // 我红，父黑，祖红，旋转祖
-                    node->color = node_T::COLOR_RED;
-                    node->parent()->color = node_T::COLOR_BLACK;
-                    grandparent->color = node_T::COLOR_RED;
-
-                    grandparent->get_height();
-
-                    if (node == node->parent()->left()
-                     && node->parent() == grandparent->left()) {
-                        this->rotate_right(grandparent);
-                    } else if (node == node->parent()->right()
-                            && node->parent() == grandparent->left()) {
-                        this->rotate_left(node->parent());
-                        this->rotate_right(grandparent);
-                    } else if (node == node->parent()->left()
-                            && node->parent() == grandparent->right()) {
-                        this->rotate_right(node->parent());
-                        this->rotate_left(grandparent);
-                    } else if (node == node->parent()->right()
-                            && node->parent() == grandparent->right()) {
-                        this->rotate_left(grandparent);
-                    }
-                } else {
-                    // 叔节点是红色
-                    node->color = node_T::COLOR_RED;
-                    node->parent()->color = node_T::COLOR_BLACK;
-                    uncle->color = node_T::COLOR_BLACK;
-                    maintain(grandparent);
-                }
-            }
-        };
-
         node_T *newnode = dynamic_cast<base_type *>(this)->push(val);
-        maintain(newnode);
+        this->maintain(newnode);
 
         return newnode;
     }
