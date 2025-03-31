@@ -28,9 +28,9 @@ protected:
 public:
   T value;
 
-  inline treenode_t<T>*& left();
-  inline treenode_t<T>*& right();
-  inline treenode_t<T>*& parent();
+  constexpr inline treenode_t<T>*& left()   noexcept;
+  constexpr inline treenode_t<T>*& right()  noexcept;
+  constexpr inline treenode_t<T>*& parent() noexcept;
 
 public:
   treenode_t(T value);
@@ -150,9 +150,9 @@ class RB_treenode_t : public treenode_t<T> {
 public:
   RB_treenode_t(T val);
 
-  inline RB_treenode_t<T>*& left();
-  inline RB_treenode_t<T>*& right();
-  inline RB_treenode_t<T>*& parent();
+  constexpr inline RB_treenode_t<T>*& left()    noexcept;
+  constexpr inline RB_treenode_t<T>*& right()   noexcept;
+  constexpr inline RB_treenode_t<T>*& parent()  noexcept;
 
   enum { COLOR_BLACK = 0, COLOR_RED } color;
 };
@@ -161,6 +161,9 @@ template <typename T, typename node_T = RB_treenode_t<T> >
 class RB_tree_t : public search_tree_t<T, node_T> {
 private:
   using base_type = search_tree_t<T, node_T>;
+
+  void maintain(node_T *node);
+  void maintain_delete(node_T *node);
 
 public:
   RB_tree_t() = default;
@@ -194,15 +197,15 @@ protected:
 public:
   T value;
 
-  inline treenode_t<T>*& left() {
+  constexpr inline treenode_t<T>*& left() noexcept {
     return *static_cast<treenode_t<T> **>(static_cast<void *>(&this->_left));
   }
 
-  inline treenode_t<T>*& right() {
+  constexpr inline treenode_t<T>*& right() noexcept {
     return *static_cast<treenode_t<T> **>(static_cast<void *>(&this->_right));
   }
 
-  inline treenode_t<T>*& parent() {
+  constexpr inline treenode_t<T>*& parent() noexcept {
     return *static_cast<treenode_t<T> **>(static_cast<void *>(&this->_parent));
   }
 
@@ -818,15 +821,15 @@ class RB_treenode_t : public treenode_t<T> {
 public:
   RB_treenode_t(T val) : treenode_t<T>(val) {}
 
-  inline RB_treenode_t<T>*& left() {
+  constexpr inline RB_treenode_t<T>*& left() noexcept {
     return *static_cast<RB_treenode_t<T> **> (static_cast<void *>(&this->_left));
   }
 
-  inline RB_treenode_t<T>*& right() {
+  constexpr inline RB_treenode_t<T>*& right() noexcept {
     return *static_cast<RB_treenode_t<T> **> (static_cast<void *>(&this->_right));
   }
 
-  inline RB_treenode_t<T>*& parent() {
+  constexpr inline RB_treenode_t<T>*& parent() noexcept {
     return *static_cast<RB_treenode_t<T> **> (static_cast<void *>(&this->_parent));
   }
 
@@ -887,6 +890,10 @@ private:
     }
   }
 
+  void maintain_delete(node_T *node) {
+    // TODO
+  }
+
 public:
   RB_tree_t() = default;
   RB_tree_t(typename base_type::comparer_type cmp)
@@ -906,7 +913,49 @@ public:
     return newnode;
   }
 
-  void erase(node_T *node) {
+  node_T *erase(node_T *node) {
+    uint_t degree = node->get_degree();
+
+    node_T *child, *nownode;
+    switch (degree) {
+      case 0:
+        // 无子
+        if (node->color == node_T::COLOR_RED) {
+          // 红叶
+          if (node->parent()) {
+            if (node->parent()->left() == node)
+              node->parent()->left() = nullptr;
+            else
+              node->parent()->right() = nullptr;
+          }
+          if (this->root == node) this->root = nullptr;
+          delete node;
+          return nullptr;
+        } else {
+          // 黑色
+          this->maintain_delete(node);
+          delete node;
+          break;
+        }
+      case 1:
+        // 只有一子，由红黑树的性质，此子必为红色，node则必为黑色
+        // 此子被删除
+        child = node->left() ? node->left() : node->right();
+        node->value = std::move(child->value);
+        node->left() = child->left();
+        node->right() = child->right();
+        child->left()->parent() = node;
+        child->right()->parent() = node;
+        delete child;
+        return nullptr;
+      case 2:
+        // 左右子都有
+        // TODO
+        this->maintain_delete(
+          nownode = dynamic_cast<base_type *>(this)->erase(node));
+        return nownode;
+      default:;
+    }
   }
 
   void remove(T val) {
