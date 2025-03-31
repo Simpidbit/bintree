@@ -28,9 +28,9 @@ protected:
 public:
     T value;
 
-    treenode_t<T>*& left();
-    treenode_t<T>*& right();
-    treenode_t<T>*& parent();
+    inline treenode_t<T>*& left();
+    inline treenode_t<T>*& right();
+    inline treenode_t<T>*& parent();
 
 public:
     treenode_t(T value);
@@ -150,9 +150,9 @@ class RB_treenode_t : public treenode_t<T> {
 public:
     RB_treenode_t(T val);
 
-    RB_treenode_t<T>*& left();
-    RB_treenode_t<T>*& right();
-    RB_treenode_t<T>*& parent();
+    inline RB_treenode_t<T>*& left();
+    inline RB_treenode_t<T>*& right();
+    inline RB_treenode_t<T>*& parent();
 
     enum { COLOR_BLACK = 0, COLOR_RED } color;
 };
@@ -194,25 +194,16 @@ protected:
 public:
     T value;
 
-    treenode_t<T>*& left() {
-        treenode_t<T> **pp = static_cast<treenode_t<T> **>(
-                static_cast<void *>(&this->_left)
-        );
-        return *pp;
+    inline treenode_t<T>*& left() {
+        return *static_cast<treenode_t<T> **>(static_cast<void *>(&this->_left));
     }
 
-    treenode_t<T>*& right() {
-        treenode_t<T> **pp = static_cast<treenode_t<T> **>(
-                static_cast<void *>(&this->_right)
-        );
-        return *pp;
+    inline treenode_t<T>*& right() {
+        return *static_cast<treenode_t<T> **>(static_cast<void *>(&this->_right));
     }
 
-    treenode_t<T>*& parent() {
-        treenode_t<T> **pp = static_cast<treenode_t<T> **>(
-                static_cast<void *>(&this->_parent)
-        );
-        return *pp;
+    inline treenode_t<T>*& parent() {
+        return *static_cast<treenode_t<T> **>(static_cast<void *>(&this->_parent));
     }
 
 public:
@@ -833,25 +824,16 @@ class RB_treenode_t : public treenode_t<T> {
 public:
     RB_treenode_t(T val) : treenode_t<T>(val) {}
 
-    RB_treenode_t<T>*& left() {
-        RB_treenode_t<T> **pp = static_cast<RB_treenode_t<T> **>(
-                static_cast<void *>(&this->_left)
-        );
-        return *pp;
+    inline RB_treenode_t<T>*& left() {
+        return *static_cast<RB_treenode_t<T> **> (static_cast<void *>(&this->_left));
     }
 
-    RB_treenode_t<T>*& right() {
-        RB_treenode_t<T> **pp = static_cast<RB_treenode_t<T> **>(
-                static_cast<void *>(&this->_right)
-        );
-        return *pp;
+    inline RB_treenode_t<T>*& right() {
+        return *static_cast<RB_treenode_t<T> **> (static_cast<void *>(&this->_right));
     }
 
-    RB_treenode_t<T>*& parent() {
-        RB_treenode_t<T> **pp = static_cast<RB_treenode_t<T> **>(
-                static_cast<void *>(&this->_parent)
-        );
-        return *pp;
+    inline RB_treenode_t<T>*& parent() {
+        return *static_cast<RB_treenode_t<T> **> (static_cast<void *>(&this->_parent));
     }
 
     enum { COLOR_BLACK = 0, COLOR_RED } color;
@@ -863,18 +845,6 @@ private:
     using base_type = search_tree_t<T, node_T>;
 
     void maintain(node_T *node) {
-    }
-
-public:
-    RB_tree_t() = default;
-    RB_tree_t(typename base_type::comparer_type cmp)
-        : base_type(cmp) {}
-    RB_tree_t(typename base_type::comparer_type cmp,
-              typename base_type::equaler_type  eql)
-        : base_type(cmp, eql) {}
-
-    [[noreturn]]
-    node_T *rotate(node_T *node) {
         if (node == this->root) {
             node->color = node_T::COLOR_BLACK;
         } else if (node->parent()->color == node_T::COLOR_BLACK) {
@@ -921,6 +891,18 @@ public:
                 this->maintain(grandparent);
             }
         }
+    }
+
+public:
+    RB_tree_t() = default;
+    RB_tree_t(typename base_type::comparer_type cmp)
+        : base_type(cmp) {}
+    RB_tree_t(typename base_type::comparer_type cmp,
+              typename base_type::equaler_type  eql)
+        : base_type(cmp, eql) {}
+
+    [[noreturn]]
+    node_T *rotate(node_T *node) {
     }
 
     node_T *push(T val) {
