@@ -23,7 +23,7 @@ class treenode_t {
 protected:
   void *_left   = nullptr;
   void *_right  = nullptr;
-  void *_parent   = nullptr;
+  void *_parent = nullptr;
 
 public:
   T value;
@@ -104,7 +104,7 @@ public:
 
 protected:
   comparer_type comparer  = [] (const T &a, const T &b) -> bool { return a < b; };
-  equaler_type equaler  = [] (const T &a, const T &b) -> bool { return a == b; };
+  equaler_type equaler    = [] (const T &a, const T &b) -> bool { return a == b; };
 
 public:
   search_tree_t() = default;
@@ -133,7 +133,7 @@ public:
   AVL_tree_t(typename base_type::comparer_type cmp);
 
   AVL_tree_t(typename base_type::comparer_type cmp,
-         typename base_type::equaler_type  eql);
+             typename base_type::equaler_type  eql);
 
   node_T *rotate(node_T *node);
   node_T *push(T val);
@@ -166,7 +166,7 @@ public:
   RB_tree_t() = default;
   RB_tree_t(typename base_type::comparer_type cmp);
   RB_tree_t(typename base_type::comparer_type cmp,
-        typename base_type::equaler_type  eql);
+            typename base_type::equaler_type  eql);
 
   node_T *rotate(node_T *node);
   node_T *push(T val);
@@ -189,7 +189,7 @@ class treenode_t {
 protected:
   void *_left   = nullptr;
   void *_right  = nullptr;
-  void *_parent   = nullptr;
+  void *_parent = nullptr;
 
 public:
   T value;
@@ -304,12 +304,6 @@ public:
   node_T *root = nullptr;
 
 public:
-  /*
-         1
-    2         3
-  4     5     6     7
-
-  */
   bintree_t() = default;
   ~bintree_t() {
     std::list<node_T *> todel;
@@ -593,7 +587,7 @@ public:
 
 protected:
   comparer_type comparer  = [] (const T &a, const T &b) -> bool { return a < b; };
-  equaler_type equaler  = [] (const T &a, const T &b) -> bool { return a == b; };
+  equaler_type equaler    = [] (const T &a, const T &b) -> bool { return a == b; };
 
 public:
   search_tree_t() = default;
@@ -745,7 +739,7 @@ public:
     : base_type(cmp) {}
 
   AVL_tree_t(typename base_type::comparer_type cmp,
-         typename base_type::equaler_type  eql)
+             typename base_type::equaler_type  eql)
     : base_type(cmp, eql) {}
 
   node_T *rotate(node_T *node) {
