@@ -12,12 +12,13 @@ using std::cin;
 
 int main()
 {
-    auto print_action = [] (treenode_t<int> *node, uint_t level, left_or_right_e) {
+    auto print_action = [] (RB_treenode_t<int> *node, uint_t level, left_or_right_e) {
         cout << node->value << ", ";
     };
 
-    AVL_tree<int> tree;
-    //AVL_tree<int> tree([] (const int &a, const int &b) -> bool {return a > b;});
+    RB_tree_t<int> tree;
+    //AVL_tree_t<int> tree([] (const int &a, const int &b) -> bool {return a > b;});
+    //tree.set_replace_policy(RB_tree_t<int>::EQ_REPLACE);
 
     for (;;) {
         int oper, val;
