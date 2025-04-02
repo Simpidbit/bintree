@@ -116,6 +116,8 @@ public:
   node_T *search_value(T val);
   node_T *push(T val);
   void remove(T val);
+
+  // 返回删除操作后被删除节点原位置的新节点
   node_T *erase(node_T *node);
 };
 
@@ -914,48 +916,212 @@ public:
   }
 
   node_T *erase(node_T *node) {
-    uint_t degree = node->get_degree();
-
-    node_T *child, *nownode;
-    switch (degree) {
-      case 0:
-        // 无子
-        if (node->color == node_T::COLOR_RED) {
-          // 红叶
-          if (node->parent()) {
-            if (node->parent()->left() == node)
-              node->parent()->left() = nullptr;
-            else
-              node->parent()->right() = nullptr;
-          }
-          if (this->root == node) this->root = nullptr;
-          delete node;
-          return nullptr;
-        } else {
-          // 黑色
-          this->maintain_delete(node);
-          delete node;
-          break;
-        }
-      case 1:
-        // 只有一子，由红黑树的性质，此子必为红色，node则必为黑色
-        // 此子被删除
-        child = node->left() ? node->left() : node->right();
-        node->value = std::move(child->value);
-        node->left() = child->left();
-        node->right() = child->right();
-        child->left()->parent() = node;
-        child->right()->parent() = node;
-        delete child;
-        return nullptr;
-      case 2:
-        // 左右子都有
-        // TODO
-        this->maintain_delete(
-          nownode = dynamic_cast<base_type *>(this)->erase(node));
-        return nownode;
-      default:;
+    if (node == this->root && node->get_degree() == 0) {
+      this->root = nullptr;
+      delete node;
+      return nullptr;
     }
+
+    node_T *sibling = nullptr;
+
+    // 1. node 红，无子
+    if (node->color == node_T::COLOR_RED
+        && node->get_degree() == 0) {
+      // 直接摘除
+      if (node->parent()->left() == node)
+        node->parent()->left() = nullptr;
+      else
+        node->parent()->right() = nullptr;
+      delete node;
+      return nullptr;
+    }
+
+    // 2. node黑，兄弟无子
+    if (node->get_degree() == 0
+        && node->color == node_T::COLOR_BLACK
+        && (sibling = this->get_sibling(node))->get_degree() == 0) {
+      // 此时兄弟必黑，父必红
+      sibling->color = node_T::COLOR_RED;
+      node->parent()->color = node_T::COLOR_BLACK;
+
+      if (node->parent()->left() == node)
+        node->parent()->left() = nullptr;
+      else
+        node->parent()->right() = nullptr;
+      delete node;
+      return nullptr;
+    }
+
+    // 3. node黑，兄弟度1，兄弟与侄子同侧
+    if (node->get_degree() == 0
+        && node->color == node_T::COLOR_BLACK
+        && (sibling = this->get_sibling(node))->get_degree() == 1
+        && (
+            (sibling == node->parent()->left() && sibling->left())
+            ||
+            (sibling == node->parent()->right() && sibling->right())
+          )) {
+      node_T *nephew = sibling->left() ? sibling->left() : sibling->right();
+      sibling->color = node->parent()->color;
+      node->parent()->color = node_T::COLOR_BLACK;
+      nephew->color = node_T::COLOR_BLACK;
+
+      // 删除node
+      if (node->parent()->left() == node)
+        node->parent()->left() = nullptr;
+      else
+        node->parent()->right() = nullptr;
+      delete node;
+      node = nullptr;
+
+      node_T *oriparent = sibling->parent();
+      if (nephew == sibling->left())
+        this->rotate_right(sibling->parent());
+      else
+        this->rotate_left(sibling->parent());
+      return oriparent;
+    }
+
+    // 4. node黑，兄弟度1，兄弟与侄子不同侧
+    if (node->get_degree() == 0
+        && node->color == node_T::COLOR_BLACK
+        && (sibling = this->get_sibling(node))->get_degree() == 1
+        && (
+            (sibling == node->parent()->left() && sibling->right())
+            ||
+            (sibling == node->parent()->right() && sibling->left())
+          )) {
+      // 此时侄子必为红色
+      node_T *nephew = sibling->left() ? sibling->left() : sibling->right();
+      
+      // 删除node
+      if (node->parent()->left() == node)
+        node->parent()->left() = nullptr;
+      else
+        node->parent()->right() = nullptr;
+      delete node;
+
+      // 交换兄弟和侄子的颜色
+      auto _color_tmp = sibling->color;
+      sibling->color = nephew->color;
+      nephew->color = _color_tmp;
+
+      // 旋转
+      if (sibling == sibling->parent()->left())
+        this->rotate_left(sibling);
+      else
+        this->rotate_right(sibling);
+
+      // 现在兄弟节点和侄子节点互换了
+      auto _node_tmp = sibling;
+      sibling = nephew;
+      nephew = _node_tmp;
+
+      sibling->color = sibling->parent()->color;
+      sibling->parent()->color = node_T::COLOR_BLACK;
+      nephew->color = node_T::COLOR_BLACK;
+
+      // 再次旋转
+      node_T *oriparent = sibling->parent();
+      if (sibling == sibling->parent()->left())
+        this->rotate_right(sibling);
+      else
+        this->rotate_left(sibling);
+      return oriparent;
+    }
+
+    // 5. node，兄弟及其子节点全黑
+    if (node->get_degree() == 0
+        && (sibling = this->get_sibling(node))->color == node_T::COLOR_BLACK
+        && (
+            (sibling->left() == nullptr ? true : sibling->left()->color == node_T::COLOR_BLACK) 
+            &&
+            (sibling->right() == nullptr ? true : sibling->right()->color == node_T::COLOR_BLACK)
+          )) {
+      // 互换颜色
+      auto _color_tmp = sibling->color;
+      sibling->color = sibling->parent()->color;
+      sibling->parent()->color = _color_tmp;
+
+      // 删除node
+      if (node->parent()->left() == node)
+        node->parent()->left() = nullptr;
+      else
+        node->parent()->right() = nullptr;
+      delete node;
+      return nullptr;
+    }
+
+    // 6. node黑，兄弟红，兄弟有两个子
+    if (node->get_degree() == 0
+        && (sibling = this->get_sibling(node))->color == node_T::COLOR_RED
+        && sibling->left()
+        && sibling->right()) {
+      // 交换父和兄的颜色
+      auto _color_tmp = sibling->color;
+      sibling->color = sibling->parent()->color;
+      sibling->parent()->color = _color_tmp;
+
+      if (node == node->parent()->left())
+        this->rotate_left(node->parent());
+      else
+        this->rotate_right(node->parent());
+
+      sibling = this->get_sibling(node);
+      _color_tmp = node->parent()->color;
+      node->parent()->color = sibling->color;
+      sibling->color = _color_tmp;
+
+      // 删除node
+      node_T *oriparent = node->parent();
+      if (node == node->parent()->left())
+        node->parent()->left() = nullptr;
+      else
+        node->parent()->right() = nullptr;
+      delete node;
+      return oriparent;
+    }
+
+    // node度1，黑色
+    if (node->get_degree() == 1
+        && node->color == node_T::COLOR_BLACK) {
+      node_T *child = node->left() ? node->left() : node->right();
+      child->color = node_T::COLOR_BLACK;
+
+      if (node->parent()->left() == node)
+        node->parent()->left() = child;
+      else
+        node->parent()->right() = child;
+
+      child->parent() = node->parent();
+
+      delete node;
+      return child;
+    }
+
+    // node度2
+    if (node->get_degree() == 2) {
+      // 找到左子树中的最大节点
+      node_T *leftmax = nullptr;
+      node_T *cur = node->left();
+
+      for (;;) {
+        if (cur->right())
+          cur = cur->right();
+        else
+          break;
+      }
+      leftmax = cur;
+
+      // 交换值
+      auto _value_tmp = std::move(leftmax->value);
+      leftmax->value = std::move(node->value);
+      node->value = std::move(_value_tmp);
+
+      // 删leftmax
+      return this->erase(leftmax);
+    }
+    return nullptr;
   }
 
   void remove(T val) {
