@@ -931,11 +931,23 @@ public:
   }
 
   node_T *erase(node_T *node) {
-    if (node == this->root && node->get_degree() == 0) {
-      this->root = nullptr;
-      delete node;
-      return nullptr;
+    if (node == this->root) {
+      auto degree = node->get_degree();
+      if (degree == 0) {
+        this->root = nullptr;
+        delete node;
+        return this->root;
+      } else if (degree == 1) {
+        if (node->left())
+          this->root = node->left();
+        else
+          this->root = node->right();
+        this->root->color = node_T::COLOR_BLACK;
+        delete node;
+        return this->root;
+      }
     }
+
 
     node_T *sibling = nullptr;
 
