@@ -165,7 +165,6 @@ private:
   using base_type = search_tree_t<T, node_T>;
 
   void maintain(node_T *node);
-  void maintain_delete(node_T *node);
 
 public:
   RB_tree_t() = default;
@@ -189,6 +188,10 @@ using int_t  = int32_t;
 // **************************************
 // ************* treenode_t *************
 // **************************************
+
+/**
+ * @brief 树节点
+ */
 template <typename T>
 class treenode_t {
 protected:
@@ -289,6 +292,9 @@ public:
   }
 };
 
+/**
+ * @brief 标示节点是父节点的左子节点还是右子节点，还是本身就是根节点.
+ */
 typedef enum {
   NODE_ROOT = 0,
   NODE_LEFT,
@@ -298,6 +304,10 @@ typedef enum {
 // *************************************
 // ************* bintree_T *************
 // *************************************
+
+/**
+ * @brief 最普通的二叉树，是其它二叉树的祖先类.
+ */
 template <typename T, typename node_T = treenode_t<T> >
 class bintree_t {
 public:
@@ -320,6 +330,11 @@ public:
       delete each;
   }
 
+  /**
+   * @brief 获取某个节点的兄弟节点.
+   * @param node 目标节点指针.
+   * @return 目标节点 node 的兄弟节点指针.
+   */
   node_T *get_sibling(node_T *node) {
     if (node->parent()) {
       if (node->parent()->left() == node)
@@ -329,7 +344,9 @@ public:
     } else return nullptr;
   }
 
-  /* 层序遍历 */
+  /**
+   * @brief 层序遍历二叉树.
+   */
   void trav_bfs(trav_action_t action) {
     if (!this->root) return;
     using std::deque;
@@ -349,7 +366,9 @@ public:
     }
   }
 
-  /* 前序遍历 */
+  /**
+   * @brief 前序遍历二叉树.
+   */
   void trav_pre(trav_action_t action) {
     if (!this->root) return;
     std::function<void (node_T *, trav_action_t, uint_t, left_or_right_e)> recur_trav = 
@@ -364,7 +383,9 @@ public:
     recur_trav(this->root, action, 0, NODE_ROOT);
   }
 
-  /* 中序遍历 */
+  /**
+   * @brief 中序遍历二叉树
+   */
   void trav_in(trav_action_t action) {
     if (!this->root) return;
     std::function<void (node_T *, trav_action_t, uint_t, left_or_right_e)> recur_trav = 
@@ -380,7 +401,9 @@ public:
     recur_trav(this->root, action, 0, NODE_ROOT);
   }
 
-  /* 后序遍历 */
+  /**
+   * @brief 后序遍历二叉树
+   */
   void trav_post(trav_action_t action) {
     if (!this->root) return;
     std::function<void (node_T *, trav_action_t, uint_t, left_or_right_e)> recur_trav = 
@@ -892,10 +915,6 @@ private:
     }
   }
 
-  void maintain_delete(node_T *node) {
-    // TODO
-  }
-
 public:
   RB_tree_t() = default;
   RB_tree_t(typename base_type::comparer_type cmp)
@@ -903,10 +922,6 @@ public:
   RB_tree_t(typename base_type::comparer_type cmp,
         typename base_type::equaler_type  eql)
     : base_type(cmp, eql) {}
-
-  [[noreturn]]
-  node_T *rotate(node_T *node) {
-  }
 
   node_T *push(T val) {
     node_T *newnode = dynamic_cast<base_type *>(this)->push(val);
