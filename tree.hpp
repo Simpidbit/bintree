@@ -11,177 +11,6 @@
 
 
 
-/*
-
-using uint_t = uint32_t;
-using int_t  = int32_t;
-
-// **************************************
-// ************* treenode_t *************
-// **************************************
-template <typename T>
-class treenode_t {
-protected:
-  void *_left   = nullptr;
-  void *_right  = nullptr;
-  void *_parent = nullptr;
-
-public:
-  T value;
-
-  constexpr inline treenode_t<T>*& left()   noexcept;
-  constexpr inline treenode_t<T>*& right()  noexcept;
-  constexpr inline treenode_t<T>*& parent() noexcept;
-
-public:
-  treenode_t(T value);
-  treenode_t(treenode_t &&node);
-
-  void hookleft(treenode_t *newparent);
-  void hookright(treenode_t *newparent);
-
-  void addleft(treenode_t *child);
-  void addleft(T val);
-  void addright(treenode_t *child);
-  void addright(T val);
-
-  uint_t get_height();
-  uint_t get_degree();
-  int get_balance_factor();
-};
-
-typedef enum {
-  NODE_ROOT = 0,
-  NODE_LEFT,
-  NODE_RIGHT
-} left_or_right_e;
-
-// *************************************
-// ************* bintree_T *************
-// *************************************
-template <typename T, typename node_T = treenode_t<T> >
-class bintree_t {
-public:
-  using trav_action_t = std::function<void (node_T *, uint_t, left_or_right_e)>;
-  using node_type = node_T;
-  using value_type = T;
-
-public:
-  node_T *root = nullptr;
-
-public:
-  bintree_t() = default;
-  ~bintree_t();
-
-  node_T *get_sibling(node_T *node);
-
-  void trav_bfs(trav_action_t action);
-  void trav_pre(trav_action_t action);
-  void trav_in(trav_action_t action);
-  void trav_post(trav_action_t action);
-
-  void print_tree();
-
-  void rotate_right(node_T *node);
-  void rotate_left(node_T *node);
-
-#ifdef DEBUG
-  node_T * operator[](T val);
-#endif
-};
-
-// *****************************************
-// ************* search_tree_t *************
-// *****************************************
-template <typename T, typename node_T = treenode_t<T> >
-class search_tree_t : public bintree_t<T, node_T> {
-private:
-  using base_type = bintree_t<T, node_T>;
-
-public:
-  enum { EQ_REPLACE = 0, EQ_KEEP } replace_policy = EQ_REPLACE;
-  using comparer_type = std::function<bool (const T &a, const T &b)>;
-  using equaler_type  = std::function<bool (const T &a, const T &b)>;
-
-protected:
-  comparer_type comparer  = [] (const T &a, const T &b) -> bool { return a < b; };
-  equaler_type equaler    = [] (const T &a, const T &b) -> bool { return a == b; };
-
-public:
-  search_tree_t() = default;
-  search_tree_t(decltype(comparer) cmp);
-  search_tree_t(decltype(comparer) cmp, decltype(equaler) eql);
-
-  inline void set_replace_policy(decltype(replace_policy) rp);
-
-  node_T *search_value(T val);
-  node_T *push(T val);
-  void remove(T val);
-
-  // 返回删除操作后被删除节点原位置的新节点
-  node_T *erase(node_T *node);
-};
-
-// **************************************
-// ************* AVL_tree_t *************
-// **************************************
-template <typename T, typename node_T = treenode_t<T> >
-class AVL_tree_t : public search_tree_t<T, node_T> {
-private:
-  using base_type = search_tree_t<T, node_T>;
-
-public:
-  AVL_tree_t() = default;
-
-  AVL_tree_t(typename base_type::comparer_type cmp);
-
-  AVL_tree_t(typename base_type::comparer_type cmp,
-             typename base_type::equaler_type  eql);
-
-  node_T *rotate(node_T *node);
-  node_T *push(T val);
-  void erase(node_T *node);
-  void remove(T val);
-};
-
-// *************************************
-// ************* RB_tree_t *************
-// *************************************
-
-template <typename T>
-class RB_treenode_t : public treenode_t<T> {
-public:
-  RB_treenode_t(T val);
-
-  constexpr inline RB_treenode_t<T>*& left()    noexcept;
-  constexpr inline RB_treenode_t<T>*& right()   noexcept;
-  constexpr inline RB_treenode_t<T>*& parent()  noexcept;
-
-  enum { COLOR_BLACK = 0, COLOR_RED } color;
-};
-
-template <typename T, typename node_T = RB_treenode_t<T> >
-class RB_tree_t : public search_tree_t<T, node_T> {
-private:
-  using base_type = search_tree_t<T, node_T>;
-
-  void maintain(node_T *node);
-
-public:
-  RB_tree_t() = default;
-  RB_tree_t(typename base_type::comparer_type cmp);
-  RB_tree_t(typename base_type::comparer_type cmp,
-            typename base_type::equaler_type  eql);
-
-  node_T *rotate(node_T *node);
-  node_T *push(T val);
-  void erase(node_T *node);
-  void remove(T val);
-  void print_tree();
-};
-
-*/
-
 using uint_t = uint32_t;
 using int_t  = int32_t;
 
@@ -454,34 +283,6 @@ public:
     std::cout << "Print OK." << std::endl;
   }
 
-  /*
-  node:
-    左节点 == null
-      (不可右旋)
-      返回
-    左节点 != null
-      (可以右旋)
-      父节点 == null
-        (node是根节点)
-        根节点 = 左子
-
-        tmp = 左子->右子
-        左子->右子 = node
-        node->左子 = tmp
-
-      父节点 != null
-        (node不是根节点)
-        父->(左/右)子 = 左子
-
-        tmp = 左子->右子
-        左子->右子 = node
-        node->左子 = tmp
-
-  | node | L | L->L | L->R | R | R->L | R->R | P | YESorNO
-    0  *  *    *   *  *    *   *    0
-    1  0  *    *   *  *    *   *    0
-    1  1
-  */
   void rotate_right(node_T *node) {
     if (!node) {
       std::cout << "不可对nullptr右旋!" << std::endl;
@@ -525,31 +326,6 @@ public:
     }
   }
 
-  /*
-  node:
-    右节点 == null
-      (不可左旋)
-    右节点 != null
-      (可以左旋)
-      父节点 == null
-        (node是根节点)
-        根节点 = 右子
-
-        tmp = 右子->左子
-        右子->左子 = node
-        右子 = tmp
-      父节点 != null
-        (node不是根节点)
-        父->(左/右)子 = 右子
-
-        tmp = 右子->左子
-        右子->左子 = node
-        右子 = tmp
-
-  | node | L | L->L | L->R | R | R->L | R->R | P | YESorNO
-    0  *  *    *   *  *    *   *    0
-    1  *  *    *   0  *    *   *    0
-  */
   void rotate_left(node_T *node) {
     if (!node) {
       std::cout << "不可对nullptr左旋!" << std::endl;
@@ -725,13 +501,6 @@ public:
         return node;
       }
     } else {
-      /*
-        以左子树的最大节点(left_max)替换此被删除的节点
-        ml存在:
-          mp继承ml
-        mr存在:
-          不可能，因为m不会存在r
-      */
       node_T *left_max = node->left();
       for (;;) {
         if (left_max->right())
