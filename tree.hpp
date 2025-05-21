@@ -1234,20 +1234,22 @@ public:
     return newnode;
   }
 
-  void erase(node_T *node) {
+  bool erase(node_T *node) {
+    if (node == nullptr) return false;
     if (node == this->root) {
       this->delete_root();
-      return;
+      return true;
     }
 
     if (node->get_degree() == 0)        this->delete_degree_0(node);
     else if (node->get_degree() == 1)   this->delete_degree_1(node);
     else                                this->delete_degree_2(node);
+    return true;
   }
   
-  void remove(T val) {
+  bool remove(T val) {
     node_T *node = this->search_value(val);
-    this->erase(node);
+    return this->erase(node);
   }
 
   void print_tree() {

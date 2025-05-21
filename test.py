@@ -1,6 +1,6 @@
 from random import randint
 
-oper_num = 1000000
+oper_num = 10000
 
 node_set = set()
 msg = ''
