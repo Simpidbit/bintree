@@ -20,10 +20,15 @@ int main()
     //AVL_tree_t<int> tree([] (const int &a, const int &b) -> bool {return a > b;});
     //tree.set_replace_policy(RB_tree_t<int>::EQ_REPLACE);
 
-    for (;;) {
+    size_t max_count = 0;
+    cin >> max_count;
+
+    size_t oper_count = 0;
+    for (;; oper_count++) {
         int oper, val;
         cout << "Insert a oper-value: ";
         cin >> oper >> val;
+        cout << "oper: " << oper << ", val: " << val << "; oper_count = " << oper_count << endl;
         switch (oper) {
             case 0: 
                     tree.push(val);
@@ -33,6 +38,7 @@ int main()
                     break;
         }
         tree.print_tree();
+        if (oper_count + 1 == max_count) break;
     }
 
     return 0;
