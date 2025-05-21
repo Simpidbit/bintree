@@ -908,7 +908,6 @@ private:
       oparent->which_son_is(onode) = oson;
       oson->parent() = oparent;
     } else {
-      std::cout << "改变root" << std::endl;
       this->root = oson;
       oson->parent() = nullptr;
     }
@@ -942,9 +941,6 @@ private:
 
       if (is_uncle_black) {
         // 叔节点是黑色 NIL
-
-        //grandparent->get_height();
-        
         if (node == node->parent()->left()
          && node->parent() == grandparent->left()) {
 
@@ -996,25 +992,18 @@ private:
 
     if (front_node != node->left()) {
       // 和前驱互换
-      std::cout << "和前驱互换!" << std::endl;
-      std::cout << "前驱: " << front_node->value << std::endl;
       T tmp = std::move(node->value);
       node->value = std::move(front_node->value);
       front_node->value = std::move(tmp);
 
-      std::cout << "互换后: " << std::endl;
-      this->print_tree();
       this->erase(front_node);
     } else {
       // 和后继互换
-      std::cout << "和后继互换!" << std::endl;
       T tmp = std::move(node->value);
       node->value = std::move(back_node->value);
       back_node->value = std::move(tmp);
 
-      std::cout << "从recursive_delete里调用" << std::endl;
       this->erase(back_node);
-      std::cout << "从recursive_delete里的调用完成!" << std::endl;
     }
   }
 
@@ -1028,20 +1017,7 @@ private:
     }
   }
 
-  void recursive_balance_maintain_a1(node_T *node, bool side) {
-    if (node == this->root) return;
-    if (node->parent()) {
-      if (node->parent()->left() == node)
-        balance_maintain(node->parent(), true);
-      else
-        balance_maintain(node->parent(), false);
-    }
-  }
-
   void balance_maintain_c0(node_T *node, bool side) {
-    std::cout << "来到c0" << std::endl;
-    std::cout << "node: " << node->value << std::endl;
-    this->print_tree();
 
     if (side) { // 右低
       if (!node->left()->right())
@@ -1079,9 +1055,6 @@ private:
   }
 
   void balance_maintain_c1(node_T *node, bool side) {
-    std::cout << "来到 c1" << std::endl;
-    std::cout << "node: " << node->value << std::endl;
-    this->print_tree();
 
     auto color_of = [] (node_T *node) -> auto {
       if (!node) return node_T::COLOR_BLACK;
@@ -1170,9 +1143,6 @@ private:
   }
 
   void balance_maintain_c2(node_T *node, bool side) {
-    std::cout << "来到 c2" << std::endl;
-    std::cout << "node: " << node->value;
-    this->print_tree();
     if (!side) { // 左低
       node->left()->color = node_T::COLOR_BLACK;
     } else {    // 右低
@@ -1181,9 +1151,6 @@ private:
   }
 
   void balance_maintain_c3(node_T *node, bool side) {
-    std::cout << "来到 c3" << std::endl;
-    std::cout << "node: " << node->value;
-    this->print_tree();
     if (!side) { // 左低
       node->left()->color = node_T::COLOR_BLACK;
     } else {    // 右低
@@ -1192,9 +1159,6 @@ private:
   }
 
   void balance_maintain_c4(node_T *node, bool side) {
-    std::cout << "来到了c4" << std::endl;
-    std::cout << "node: " << node->value << std::endl;
-    this->print_tree();
     if (!side) { // 左低
       this->rotate_left(node);
     } else {    // 右低
@@ -1206,9 +1170,6 @@ private:
   }
 
   void balance_maintain_c5(node_T *node, bool side) {
-    std::cout << "来到了c5" << std::endl;
-    std::cout << "node: " << node->value << std::endl;
-    this->print_tree();
     if (!side) { // 左低
       this->rotate_right(node->right());
       this->rotate_left(node);
@@ -1224,9 +1185,6 @@ private:
   }
 
   void balance_maintain_c6(node_T *node, bool side) {
-    std::cout << "来到了c6" << std::endl;
-    std::cout << "node: " << node->value << std::endl;
-    this->print_tree();
     if (!side) { // 左低
       node->right()->left()->color = node_T::COLOR_BLACK;
       this->rotate_right(node->right());
@@ -1239,20 +1197,11 @@ private:
   }
 
   void balance_maintain_c7(node_T *node, bool side) {
-    std::cout << "来到了c7" << std::endl;
-    std::cout << "node: " << node->value << std::endl;
-    this->print_tree();
-    if (!side) { // 左低
-      this->rotate_left(node);
-    } else {    // 右低
-      this->rotate_right(node);
-    }
+    if (!side)  this->rotate_left(node);
+    else        this->rotate_right(node);
   }
 
   void balance_maintain_c8(node_T *node, bool side) {
-    std::cout << "来到了c8" << std::endl;
-    std::cout << "node: " << node->value << std::endl;
-    this->print_tree();
     if (!side) { // 左低
       node->color = node_T::COLOR_BLACK;
       this->rotate_right(node->right());
@@ -1265,9 +1214,6 @@ private:
   }
 
   void balance_maintain_c9(node_T *node, bool side) {
-    std::cout << "来到了c9" << std::endl;
-    std::cout << "node: " << node->value << std::endl;
-    this->print_tree();
     if (!side) { // 左低
       node->color = node_T::COLOR_RED;
       node->right()->color = node_T::COLOR_BLACK;
@@ -1282,9 +1228,6 @@ private:
   }
 
   void balance_maintain_c10(node_T *node, bool side) {
-    std::cout << "来到了c10" << std::endl;
-    std::cout << "node: " << node->value << std::endl;
-    this->print_tree();
     if (!side) { // 左低
       node->right()->left()->left()->color = node_T::COLOR_BLACK;
       this->rotate_left(node);
@@ -1314,9 +1257,6 @@ private:
       else return node->color;
     };
 
-    std::cout << "开始平衡维护程序." << std::endl;
-    std::cout << "维护节点: " << node->value << std::endl;
-    this->print_tree();
 
     if (!node->left() || !node->right()) {   // node 只有 1 子，且无孙
       balance_maintain_c1(node, side);
@@ -1418,7 +1358,6 @@ private:
 
   // node 无子.
   void delete_degree_0(node_T *node) {
-    std::cout << "0度节点: " << node->value << std::endl;
     node_T *oparent = node->parent();
 
     if (node->color == node_T::COLOR_BLACK) {
@@ -1437,13 +1376,11 @@ private:
       node->parent()->which_son_is(node) = nullptr;
       delete node;
     }
-
     return;
   }
 
   // node 有 1 子.
   void delete_degree_1(node_T *node) {
-    std::cout << "1度节点: " << node->value << std::endl;
     assert(node->color == node_T::COLOR_BLACK);
 
     node_T *sibling = this->get_sibling(node);
@@ -1454,7 +1391,6 @@ private:
 
   // node 有 2 子.
   void delete_degree_2(node_T *node) {
-    std::cout << "2度节点: " << node->value << std::endl;
     node_T *sibling = this->get_sibling(node);
 
     // node 左子有子.
@@ -1530,28 +1466,6 @@ public:
   }
 
   void erase(node_T *node) {
-    // 特殊情况
-    /*
-    if (node->parent() == this->root
-        && node->get_degree() == 0) {
-      std::cout << "特殊情况!" << std::endl;
-      node_T *sibling = this->get_sibling(node);
-      if (sibling) {
-        if (sibling->get_degree() == 0) {
-          node->parent()->which_son_is(node) = nullptr;
-          sibling->color = node_T::COLOR_RED;
-          delete node;
-          return;
-        }
-      } else {
-        this->root->which_son_is(node) = nullptr;
-        delete node;
-        return;
-      }
-    }*/
-
-    std::cout << "开始erase: " << node->value << std::endl;
-
     if (node == this->root) {
       this->delete_root();
       return;
