@@ -643,7 +643,7 @@ public:
 
 template <typename T, typename node_T = RB_treenode_t<T> >
 class RB_tree_t : public search_tree_t<T, node_T> {
-private:
+protected:
   using base_type = search_tree_t<T, node_T>;
 
   /**
