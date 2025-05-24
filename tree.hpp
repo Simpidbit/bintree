@@ -693,8 +693,6 @@ private:
   }
 
   void maintain(node_T *node) {
-    if (!node) return;
-
     if (node == this->root) {
       node->color = node_T::COLOR_BLACK;
     } else if (node->parent()->color == node_T::COLOR_BLACK) {
@@ -1229,6 +1227,8 @@ public:
 
   node_T *push(T val) {
     node_T *newnode = dynamic_cast<base_type *>(this)->push(val);
+    if (!newnode) return nullptr;
+
     this->maintain(newnode);
 
     return newnode;
