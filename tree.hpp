@@ -51,7 +51,16 @@ public:
   }
 
 public:
-  treenode_t(T value) : value(value) {}
+  treenode_t(T&& value) {
+      std::cout << "treenode_t 右值 constructor" << std::endl;
+      this->value = std::move(value);
+  }
+
+  treenode_t(const T &value) {
+      std::cout << "treenode_t 左值 constructor" << std::endl;
+      this->value = value;
+  }
+
   treenode_t(treenode_t &&node) {
     this->_left = node._left;
     this->_right = node._right;
@@ -78,8 +87,12 @@ public:
     child->parent() = this;
   }
 
-  void addleft(T val) {
+  void addleft(const T& val) {
     this->addleft(new treenode_t(val));
+  }
+
+  void addleft(T &&val) {
+    this->addleft(new treenode_t(std::move(val)));
   }
 
   void addright(treenode_t *child) {
@@ -87,8 +100,16 @@ public:
     child->parent() = this;
   }
 
-  void addright(T val) {
+  void addright(const T& val) {
     this->addright(new treenode_t(val));
+  }
+
+  void addright(T&& val) {
+      std::cout << "addright 右值" << std::endl;
+      std::cout << sizeof(treenode_t) << std::endl;
+    treenode_t *child = new treenode_t(std::move(val));
+    std::cout << "child ok" << std::endl;
+    this->addright(child);
   }
 
   uint_t get_height() {
@@ -429,13 +450,54 @@ public:
     }
   }
 
-  node_T* push(T val) {
+  node_T* push(const T& val) {
     if (!this->root) {
       this->root = new node_T(val);
       return this->root;
     }
 
     node_T *cur = this->root;
+
+
+    for (;;) {
+      if (this->equaler(cur->value, val)) {
+        switch (this->replace_policy) {
+          case EQ_KEEP:
+            return nullptr;
+          case EQ_REPLACE:
+            cur->value = val;
+            return cur;
+          default: return nullptr;  // Shouldn't be here
+        }
+      }
+
+      if (this->comparer(cur->value, val)) {
+        if (!cur->right()) {
+          cur->addright(val);
+          return cur->right();
+        }
+        cur = cur->right();
+      } else {
+        if (!cur->left()) {
+          cur->addleft(val);
+          return cur->left();
+        }
+        cur = cur->left();
+      }
+    }
+  }
+
+  node_T* push(T&& val) {
+      std::cout << "search_tree_t::push 右值" << std::endl;
+      std::cout << val.first << std::endl;
+      std::cout << val.second << std::endl;
+    if (!this->root) {
+      this->root = new node_T(std::move(val));
+      return this->root;
+    }
+
+    node_T *cur = this->root;
+
 
     for (;;) {
       if (this->equaler(cur->value, val)) {
@@ -451,13 +513,15 @@ public:
 
       if (this->comparer(cur->value, val)) {
         if (!cur->right()) {
-          cur->addright(val);
+            std::cout << "即将addright" << std::endl;
+          cur->addright(std::move(val));
+            std::cout << "addright OK" << std::endl;
           return cur->right();
         }
         cur = cur->right();
       } else {
         if (!cur->left()) {
-          cur->addleft(val);
+          cur->addleft(std::move(val));
           return cur->left();
         }
         cur = cur->left();
@@ -1225,8 +1289,17 @@ public:
         typename base_type::equaler_type  eql)
     : base_type(cmp, eql) {}
 
-  node_T *push(T val) {
+  node_T *push(const T& val) {
     node_T *newnode = dynamic_cast<base_type *>(this)->push(val);
+    if (!newnode) return nullptr;
+
+    this->maintain(newnode);
+
+    return newnode;
+  }
+
+  node_T *push(T &&val) {
+    node_T *newnode = dynamic_cast<base_type *>(this)->push(std::move(val));
     if (!newnode) return nullptr;
 
     this->maintain(newnode);
