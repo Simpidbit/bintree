@@ -52,13 +52,11 @@ public:
 
 public:
   treenode_t(T&& value) {
-      std::cout << "treenode_t 右值 constructor" << std::endl;
-      this->value = std::move(value);
+    this->value = std::move(value);
   }
 
   treenode_t(const T &value) {
-      std::cout << "treenode_t 左值 constructor" << std::endl;
-      this->value = value;
+    this->value = value;
   }
 
   treenode_t(treenode_t &&node) {
@@ -105,10 +103,7 @@ public:
   }
 
   void addright(T&& val) {
-      std::cout << "addright 右值" << std::endl;
-      std::cout << sizeof(treenode_t) << std::endl;
     treenode_t *child = new treenode_t(std::move(val));
-    std::cout << "child ok" << std::endl;
     this->addright(child);
   }
 
@@ -280,7 +275,7 @@ public:
     this->trav_pre(
       [] (node_T *node, uint_t level, left_or_right_e lorr) {
         for (uint_t i = 0; i < level; i++)
-          std::cout << "======|";
+        std::cout << "======|";
         std::cout << "\b";
         switch (lorr) {
         case NODE_ROOT:
@@ -488,9 +483,6 @@ public:
   }
 
   node_T* push(T&& val) {
-      std::cout << "search_tree_t::push 右值" << std::endl;
-      std::cout << val.first << std::endl;
-      std::cout << val.second << std::endl;
     if (!this->root) {
       this->root = new node_T(std::move(val));
       return this->root;
@@ -513,9 +505,7 @@ public:
 
       if (this->comparer(cur->value, val)) {
         if (!cur->right()) {
-            std::cout << "即将addright" << std::endl;
           cur->addright(std::move(val));
-            std::cout << "addright OK" << std::endl;
           return cur->right();
         }
         cur = cur->right();
