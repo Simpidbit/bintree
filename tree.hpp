@@ -509,7 +509,7 @@ public:
         std::cout << "in 2 if " << std::endl;
         if (!cur->right()) {
           std::cout << "in 2 if if" << std::endl;
-          cur->addright(std::move(val));
+          cur->addright(val);
           return cur->right();
         }
         std::cout << "out 2 if if" << std::endl;
