@@ -107,7 +107,7 @@ public:
     std::cout << "in addright" << std::endl;
     std::cout << "val.first = " << val.first << std::endl;
     std::cout << "val.second = " << val.second << std::endl;
-    treenode_t *child = new treenode_t(val);
+    treenode_t *child = new treenode_t(std::move(val));
     std::cout << "child make ok" << std::endl;
     this->addright(child);
   }
@@ -514,7 +514,7 @@ public:
         std::cout << "in 2 if " << std::endl;
         if (!cur->right()) {
           std::cout << "in 2 if if" << std::endl;
-          cur->addright(val);
+          cur->addright(std::move(val));
           std::cout << "addright OK" << std::endl;
           return cur->right();
         }
