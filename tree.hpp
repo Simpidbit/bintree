@@ -493,6 +493,7 @@ public:
     for (;;) {
       std::cout << "Push for loop..." << std::endl;
       if (this->equaler(cur->value, val)) {
+        std::cout << "in if" << std::endl;
         switch (this->replace_policy) {
           case EQ_KEEP:
             return nullptr;
@@ -502,6 +503,7 @@ public:
           default: return nullptr;  // Shouldn't be here
         }
       }
+      std::cout << "out if" << std::endl;
 
       if (this->comparer(cur->value, val)) {
         if (!cur->right()) {
