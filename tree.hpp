@@ -90,7 +90,7 @@ public:
   }
 
   void addleft(T &&val) {
-    this->addleft(new treenode_t(std::move(val)));
+    this->addleft(new treenode_t(val));
   }
 
   void addright(treenode_t *child) {
@@ -103,7 +103,7 @@ public:
   }
 
   void addright(T&& val) {
-    treenode_t *child = new treenode_t(std::move(val));
+    treenode_t *child = new treenode_t(val);
     this->addright(child);
   }
 
