@@ -453,7 +453,6 @@ public:
 
     node_T *cur = this->root;
 
-
     for (;;) {
       if (this->equaler(cur->value, val)) {
         switch (this->replace_policy) {
@@ -492,6 +491,7 @@ public:
 
 
     for (;;) {
+      std::cout << "Push for loop..." << std::endl;
       if (this->equaler(cur->value, val)) {
         switch (this->replace_policy) {
           case EQ_KEEP:
