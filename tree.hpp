@@ -99,6 +99,7 @@ public:
   }
 
   void addright(const T& val) {
+    std::cout << "in const T& addright()" << std::endl;
     this->addright(new treenode_t(val));
   }
 
