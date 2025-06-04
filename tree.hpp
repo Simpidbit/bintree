@@ -510,6 +510,7 @@ public:
         if (!cur->right()) {
           std::cout << "in 2 if if" << std::endl;
           cur->addright(val);
+          std::cout << "addright OK" << std::endl;
           return cur->right();
         }
         std::cout << "out 2 if if" << std::endl;
@@ -517,7 +518,7 @@ public:
       } else {
         std::cout << "in else" << std::endl;
         if (!cur->left()) {
-          cur->addleft(std::move(val));
+          cur->addleft(val);
           return cur->left();
         }
         cur = cur->left();
