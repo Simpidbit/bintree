@@ -110,7 +110,7 @@ public:
     std::cout << "val.first = " << val.first << std::endl;
     T fuck = std::move(val);
     std::cout << "val.second = " << val.second << std::endl;
-    treenode_t *child = new treenode_t<T>(fuck);
+    treenode_t<T> *child = new treenode_t<T>(fuck);
     std::cout << "child make ok" << std::endl;
     this->addright(child);
   }
