@@ -508,9 +508,11 @@ public:
       if (this->comparer(cur->value, val)) {
         std::cout << "in 2 if " << std::endl;
         if (!cur->right()) {
+          std::cout << "in 2 if if" << std::endl;
           cur->addright(std::move(val));
           return cur->right();
         }
+        std::cout << "out 2 if if" << std::endl;
         cur = cur->right();
       } else {
         std::cout << "in else" << std::endl;
