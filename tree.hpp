@@ -427,7 +427,7 @@ public:
     this->replace_policy = rp;
   }
 
-  node_T *search_value(T val) {
+  node_T *search_value(T val) const {
     node_T *cur = this->root;
 
     for (;;) {
