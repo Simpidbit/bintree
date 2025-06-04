@@ -65,7 +65,7 @@ public:
     this->_left = node._left;
     this->_right = node._right;
     this->_parent = node._parent;
-    this->value = node.value;
+    this->value = std::move(node.value);
 
     node._left   = nullptr;
     node._right  = nullptr;
