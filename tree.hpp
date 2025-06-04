@@ -52,12 +52,12 @@ public:
 
 public:
   treenode_t(T&& value) {
-    std::cout << "in treenode_t(T&& value)" << std::endl;
+    std::cout << "treenode_t(T&& value)" << std::endl;
     this->value = std::move(value);
   }
 
   treenode_t(const T &value) {
-    std::cout << "in treenode_t(const T &value)" << std::endl;
+    std::cout << "treenode_t(const T &value)" << std::endl;
     this->value = value;
   }
 
@@ -108,9 +108,8 @@ public:
   void addright(T&& val) {
     std::cout << "in addright" << std::endl;
     std::cout << "val.first = " << val.first << std::endl;
-    T fuck = std::move(val);
     std::cout << "val.second = " << val.second << std::endl;
-    treenode_t<T> *child = new treenode_t<T>(fuck);
+    treenode_t<T> *child = new treenode_t<T>(val);
     std::cout << "child make ok" << std::endl;
     this->addright(child);
   }
