@@ -52,6 +52,7 @@ public:
 
 public:
   treenode_t(T&& value) {
+    std::cout << "in treenode_t(T&& value)" << std::endl;
     this->value = std::move(value);
   }
 
