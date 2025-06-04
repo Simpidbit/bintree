@@ -109,7 +109,7 @@ public:
     std::cout << "in addright" << std::endl;
     std::cout << "val.first = " << val.first << std::endl;
     std::cout << "val.second = " << val.second << std::endl;
-    treenode_t<T> *child = new treenode_t<T>(std::forward(val));
+    treenode_t<T> *child = new treenode_t<T>(std::move(val));
     std::cout << "child make ok" << std::endl;
     this->addright(child);
   }
