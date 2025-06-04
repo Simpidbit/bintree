@@ -103,7 +103,11 @@ public:
   }
 
   void addright(T&& val) {
+    std::cout << "in addright" << std::endl;
+    std::cout << "val.first = " << val.first << std::endl;
+    std::cout << "val.second = " << val.second << std::endl;
     treenode_t *child = new treenode_t(val);
+    std::cout << "child make ok" << std::endl;
     this->addright(child);
   }
 
