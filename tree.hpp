@@ -1289,10 +1289,18 @@ public:
   }
 
   node_T *push(T &&val) {
+    std::cout << "RB_tree_t::push(T &&val) begin" << std::endl;
+
     node_T *newnode = dynamic_cast<base_type *>(this)->push(std::move(val));
+
+    std::cout << "RB_tree_t::push() OK, now will maintain...." << std::endl;
+
     if (!newnode) return nullptr;
 
+    std::cout << "Will maintain..." << std::endl;
     this->maintain(newnode);
+
+    std::cout << "Maintain OK." << std::endl;
 
     return newnode;
   }
