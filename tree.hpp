@@ -709,27 +709,27 @@ public:
 
   enum { COLOR_BLACK = 0, COLOR_RED } color;
 
-  void addleft(treenode_t *child) override { 
+  void addleft(RB_treenode_t *child) override { 
     this->left() = child;
     child->parent() = this;
   }
 
   void addleft(const T& val) override {
-    this->addleft(new treenode_t(val));
+    this->addleft(new RB_treenode_t(val));
   }
 
   void addleft(T &&val) override {
-    this->addleft(new treenode_t(val));
+    this->addleft(new RB_treenode_t(val));
   }
 
-  void addright(treenode_t *child) override {
+  void addright(RB_treenode_t *child) override {
     this->right() = child;
     child->parent() = this;
   }
 
   void addright(const T& val) override {
     std::cout << "in const T& addright()" << std::endl;
-    this->addright(new treenode_t(val));
+    this->addright(new RB_treenode_t(val));
   }
 
   void addright(T&& val) override {
@@ -737,7 +737,7 @@ public:
     std::cout << "in addright" << std::endl;
     std::cout << "val.first = " << val.first << std::endl;
     std::cout << "val.second = " << val.second << std::endl;
-    treenode_t<T> *child = new treenode_t<T>(std::forward<T>(val));
+    RB_treenode_t<T> *child = new RB_treenode_t<T>(std::forward<T>(val));
     std::cout << "child make ok" << std::endl;
     this->addright(child);
   }
