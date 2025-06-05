@@ -52,12 +52,10 @@ public:
 
 public:
   treenode_t(T&& value) {
-    std::cout << "treenode_t(T&& value)" << std::endl;
     this->value = std::move(value);
   }
 
   treenode_t(const T &value) {
-    std::cout << "treenode_t(const T &value)" << std::endl;
     this->value = value;
   }
 
@@ -101,17 +99,12 @@ public:
   }
 
   virtual void addright(const T& val) {
-    std::cout << "in const T& addright()" << std::endl;
     this->addright(new treenode_t(val));
   }
 
   virtual void addright(T&& val) {
     T cv = val;
-    std::cout << "in addright" << std::endl;
-    std::cout << "val.first = " << val.first << std::endl;
-    std::cout << "val.second = " << val.second << std::endl;
     treenode_t<T> *child = new treenode_t<T>(std::forward<T>(val));
-    std::cout << "child make ok" << std::endl;
     this->addright(child);
   }
 
@@ -499,9 +492,7 @@ public:
 
 
     for (;;) {
-      std::cout << "Push for loop..." << std::endl;
       if (this->equaler(cur->value, val)) {
-        std::cout << "in if" << std::endl;
         switch (this->replace_policy) {
           case EQ_KEEP:
             return nullptr;
@@ -511,20 +502,14 @@ public:
           default: return nullptr;  // Shouldn't be here
         }
       }
-      std::cout << "out if" << std::endl;
 
       if (this->comparer(cur->value, val)) {
-        std::cout << "in 2 if " << std::endl;
         if (!cur->right()) {
-          std::cout << "in 2 if if" << std::endl;
           cur->addright(std::move(val));
-          std::cout << "addright OK" << std::endl;
           return cur->right();
         }
-        std::cout << "out 2 if if" << std::endl;
         cur = cur->right();
       } else {
-        std::cout << "in else" << std::endl;
         if (!cur->left()) {
           cur->addleft(val);
           return cur->left();
@@ -728,17 +713,12 @@ public:
   }
 
   void addright(const T& val) {
-    std::cout << "in const T& addright()" << std::endl;
     this->addright(new RB_treenode_t(val));
   }
 
   void addright(T&& val) {
     T cv = val;
-    std::cout << "in addright" << std::endl;
-    std::cout << "val.first = " << val.first << std::endl;
-    std::cout << "val.second = " << val.second << std::endl;
     RB_treenode_t<T> *child = new RB_treenode_t<T>(std::forward<T>(val));
-    std::cout << "child make ok" << std::endl;
     this->addright(child);
   }
 
@@ -1338,18 +1318,9 @@ public:
   }
 
   node_T *push(T &&val) {
-    std::cout << "RB_tree_t::push(T &&val) begin" << std::endl;
-
     node_T *newnode = dynamic_cast<base_type *>(this)->push(std::move(val));
-
-    std::cout << "RB_tree_t::push() OK, now will maintain...." << std::endl;
-
     if (!newnode) return nullptr;
-
-    std::cout << "Will maintain..." << std::endl;
     this->maintain(newnode);
-
-    std::cout << "Maintain OK." << std::endl;
 
     return newnode;
   }
